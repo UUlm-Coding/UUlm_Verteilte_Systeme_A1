@@ -4,36 +4,37 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class EchoClient {
     private final String host;
     private final int port;
+    private Socket socket;
+
 
     public EchoClient(String host, int port) {
         this.host = host;
         this.port = port;
     }
 
-    public void start() {
-        Scanner textInputScanner = new Scanner(System.in, StandardCharsets.UTF_8);
+    public void connect() throws IOException {
+        socket = new Socket(host, port);
+    }
+
+    public String sendMessage(String message) {
         System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
 
         try(
-                Socket socket = new Socket(host, port);
                 PrintWriter output = new PrintWriter(socket.getOutputStream(), true);
                 BufferedReader socketInputReader = new BufferedReader(new InputStreamReader(socket.getInputStream()))
         ) {
-            String input;
-
-            if ((input = textInputScanner.nextLine()) != null) {
-                output.println(input);
-                String response = socketInputReader.readLine();
-                System.out.println(response);
+            if (message != null) {
+                output.println(message);
+                return socketInputReader.readLine();
             }
 
         } catch (IOException exception) {
             System.out.println("Exception: " + Arrays.toString(exception.getStackTrace()));
         }
+        return "";
     }
 }
